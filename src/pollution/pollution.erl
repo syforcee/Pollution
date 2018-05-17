@@ -108,7 +108,8 @@ getAverage(Type, [#measure{type = Type, value = V}|T], Sum, Len) -> getAverage(T
 getAverage(Type, [_|T], Sum, Len) -> getAverage(Type, T, Sum,Len).
 
 %Returns avg of given paramter from all stations on certain day
-getDailyMean(Type,{Year, Month, Day}, M) -> avgPerMonitor(Type,{Year, Month, Day}, {0,0},M).
+getDailyMean(Type,{Year, Month, Day}, M) -> avgPerMonitor(Type,{Year, Month, Day}, {0,0},M);
+getDailyMean(Type, _ ,M) -> {error, "Wrong date format {YY,MM,DD} expected"}.
 
 avgPerMonitor(_,_,{0,0},[])->{error,"No measures of given type was found"};
 avgPerMonitor(_,_,{Sum,Len},[])->Sum/Len;

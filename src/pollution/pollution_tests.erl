@@ -60,4 +60,14 @@ gradient_test()->
       0.047619047619047616},
     {error,"same input output station"}] ).
 
+getStationMean_test() ->
+  P='pollution':createMonitor(),
+  P2='pollution':addStationToMonitor("Krk",{1,1},P),
+  P3='pollution':addValue("Krk",{{2001,01,01},{01,01,1}},"PM",1,P2),
+  ?assertEqual('pollution':getStationMean("PM", "Krk"), 1.0).
 
+%%getDailyMean_test() ->
+%%  P='pollution':createMonitor(),
+%%  P2='pollution':addStationToMonitor("Krk",{1,1},P),
+%%  P3='pollution':addValue("Krk",{{2001,01,01},{01,01,1}},"PM",1,P2),
+%%  ?assertEqual('pollution':getDaMean("PM", "Krk"), 1.0).
