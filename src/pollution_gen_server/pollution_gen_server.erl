@@ -11,16 +11,23 @@
 -author("pawel").
 
 %% API
--export([start_link/0, init/1, handle_call/3, terminate/2, handle_cast/2, stop/0]).
+-export([start_link/0, init/1, handle_call/3, terminate/2, handle_cast/2, stop/0, crash/0, start/0]).
 -export([addStation/2, addValue/4, removeValue/3, getDailyMean/2, getStationMean/2, getOneValue/3]).
 
 %% START %%
+start() ->
+  start_link().
+
 start_link()   ->
+  io:format("Starting server~n"),
   M = pollution:createMonitor(),
   gen_server:start_link({local,?MODULE},?MODULE,M,[]).
 
 %%INIT%%
 init(N)-> {ok,N}.
+
+%%STOP%%
+stop() -> gen_server:call(?MODULE, terminate).
 
 %%CAST FUNCTIONS%%
 addStation(Name, Coords) -> gen_server:cast(?MODULE, {addStation, Name, Coords}).
@@ -32,17 +39,25 @@ getOneValue(Station, Date, Type) -> gen_server:call(?MODULE, {getOneValue, Stati
 getStationMean(Type, Station) -> gen_server:call(?MODULE, {getStationMean, Type, Station}).
 getDailyMean(Type, Date) -> gen_server:call(?MODULE, {getDailyMean, Type, Date}).
 
-stop() ->
-  gen_server:call(?MODULE, terminate).
 %%gradient TO DO%%
 
+%%CRASH%%
+crash() -> gen_server:cast(?MODULE, crash).
+
 %% MESSAGE HANDLERS %%
+handle_cast(crash, M) ->
+  io:format("crashing~n"),
+  X = 1/0,
+  {noreply, M};
+
 handle_cast({addStation,Name, Coords}, M) ->
   N = controlResult(M, pollution:addStationToMonitor(Name, Coords, M)),
   {noreply, N};
+
 handle_cast({addValue, Station, Date, Type, Value}, M)->
   N = controlResult(M, pollution:addValue(Station, Date, Type, Value, M)),
   {noreply, N};
+
 handle_cast({removeValue, Station, Date, Type}, M)->
   N = controlResult(M, pollution:removeValue(Station, Date, Type, M)),
   {noreply, N}.
@@ -61,6 +76,7 @@ handle_call({getStationMean, Type, Station},_From, M)->
 handle_call({getDailyMean, Type, Date},_From, M) ->
   N = controlResponse(M, pollution:getDailyMean(Type, Date, M)),
   {reply, N, M}.
+
 
 %%CONTROL ERROR FUNCTION%%
 
